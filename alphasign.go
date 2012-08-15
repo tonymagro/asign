@@ -134,22 +134,7 @@ func Parse(text string) (p []byte, err error) {
 	return
 }
 
-func findLabel(cmd []byte, labelHeader []byte) (p []byte, etxIndex int, found bool) {
-	start := bytes.Index(cmd, labelHeader)
-	if start != -1 {
-		etx := bytes.Index(cmd[start:], []byte{ETX})
-		if etx != -1 {
-			etxIndex = start + etx
-			p = cmd[start : start+etx]
-			found = true
-			return
-		}
-	}
-	found = false
-	return
-}
-
-var stxToEtx = regexp.MustCompile(fmt.Sprintf("%c[^%c]*%c", STX,ETX, ETX))
+var stxToEtx = regexp.MustCompile(fmt.Sprintf("%c[^%c]*%c", STX, ETX, ETX))
 
 func AutoMemory(cmd []byte) (p []byte, err error) {
 	p = []byte{
