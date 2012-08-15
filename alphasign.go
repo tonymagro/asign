@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"regexp"
 	"strconv"
 	"text/template"
 	"time"
@@ -133,22 +134,22 @@ func Parse(text string) (p []byte, err error) {
 	return
 }
 
-var textHeader = []byte{STX, CC_WRITE_TEXT}
-var dotHeader = []byte{STX, CC_WRITE_SMALL_DOTS_PIC}
-var stringHeader = []byte{STX, CC_WRITE_STRING}
-
-func findLabel(cmd []byte, labelHeader []byte) (p []byte, err error) {
+func findLabel(cmd []byte, labelHeader []byte) (p []byte, etxIndex int, found bool) {
 	start := bytes.Index(cmd, labelHeader)
 	if start != -1 {
 		etx := bytes.Index(cmd[start:], []byte{ETX})
 		if etx != -1 {
+			etxIndex = start + etx
 			p = cmd[start : start+etx]
+			found = true
 			return
 		}
 	}
-	err = errors.New(fmt.Sprintf("label not found: %s", labelHeader))
+	found = false
 	return
 }
+
+var stxToEtx = regexp.MustCompile(fmt.Sprintf("%c[^%c]*%c", STX,ETX, ETX))
 
 func AutoMemory(cmd []byte) (p []byte, err error) {
 	p = []byte{
@@ -156,17 +157,26 @@ func AutoMemory(cmd []byte) (p []byte, err error) {
 		CC_WRITE_SPECIAL,
 		SF_SetMemoryConfig,
 	}
+	stxs := stxToEtx.FindAll(cmd, -1)
 	found := false
-	for _, v := range ValidLabel {
-		labelHeader := append(textHeader, v)
-		subCmd, notfound := findLabel(cmd, labelHeader)
-		if notfound != nil {
+	for _, stx := range stxs {
+		size := len(stx)
+		if size < 3 {
 			continue
 		}
-		found = true
-		p = append(p, TextMemoryCmd(v, len(subCmd))...)
-	}
+		label := stx[2]
+		cmdCode := stx[1]
 
+		switch cmdCode {
+		case CC_WRITE_TEXT:
+			p = append(p, TextMemoryCmd(label, size)...)
+			found = true
+		case CC_WRITE_STRING:
+		case CC_WRITE_SMALL_DOTS_PIC:
+		default:
+			continue
+		}
+	}
 	if !found {
 		err = errors.New("unable to auto allocate memory - no labels found in command")
 	}
