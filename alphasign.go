@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"regexp"
 	"strconv"
-	"text/template"
 	"time"
 )
 
@@ -21,19 +19,143 @@ type ASign struct {
 	PacketDelay       time.Duration
 }
 
-func New(rw io.ReadWriter) *ASign {
-	return NewSign(rw, SA_BROADCAST, TC_ALLSIGNS)
+func SOT(typeCode byte, address string) []byte {
+	// Start of Transmission
+	sot := []byte{
+		NUL, NUL, NUL, NUL, NUL, // Baud Rate
+		SOH,      // Start of Header
+		typeCode, // Sign Type Code
+	}
+	sot = append(sot, address...)
+	return sot
 }
 
-func NewSign(rw io.ReadWriter, address string, typeCode byte) *ASign {
-	return &ASign{
-		rw,
-		address,
-		typeCode,
-		false,
-		100,
-		100,
+func (s *ASign) SOT() []byte {
+	return SOT(s.TypeCode, s.Address)
+}
+
+func (s *ASign) Write(p []byte) (n int, err error) {
+	parts := bytes.SplitAfter(p, []byte{STX})
+	var pn int
+	for _, p := range parts {
+		pn, err = s.Rw.Write(p)
+		n += pn
+		if err != nil {
+			return
+		}
+		time.Sleep(time.Millisecond * s.StxDelay)
 	}
+	return
+}
+
+var stxToEtx = regexp.MustCompile(fmt.Sprintf("%c[^%c]*%c", STX, ETX, ETX))
+func (s *ASign) WriteTemplate(text string) (n int, err error) {
+	p := s.SOT()
+
+	cmd, err := Parse([]byte(text))
+	if err != nil {
+		return
+	}
+	if !s.DisableAutoMemory {
+		_, err = s.WriteAutoMemoryForCmd(cmd)
+		if err != nil {
+			return
+		}
+		time.Sleep(time.Millisecond * s.PacketDelay)
+	}
+	p = append(p, cmd...)
+	p = append(p, EOT)
+	return s.Write(p)
+}
+
+func (s *ASign) WriteAutoMemoryForCmd(cmd []byte) (n int, err error) {
+	p := s.SOT()
+	memCmd, err := AutoMemory(cmd)
+	if err != nil {
+		return
+	}
+	p = append(p, memCmd...)
+	p = append(p, EOT)
+	s.Write(p)
+	return
+}
+
+func (s *ASign) Reset() (err error) {
+	_, err = s.Write(ResetCmd())
+	return
+}
+
+func ResetCmd() []byte {
+	return []byte{
+		NUL, NUL, NUL, NUL, NUL,
+		NUL, NUL, NUL, NUL, NUL,
+		NUL, NUL, NUL, NUL, NUL,
+		NUL, NUL, NUL, NUL, NUL,
+	}
+}
+
+func AutoMemory(cmd []byte) (p []byte, err error) {
+	p = []byte{
+		STX,
+		CC_WRITE_SPECIAL,
+		SF_SetMemoryConfig,
+	}
+	stxs := stxToEtx.FindAll(cmd, -1)
+	found := false
+	for _, stx := range stxs {
+		size := len(stx)
+		if size < 3 {
+			continue
+		}
+		label := stx[2]
+		cmdCode := stx[1]
+
+		switch cmdCode {
+		case CC_WRITE_TEXT:
+			p = append(p, TextMemoryCmd(label, size)...)
+			found = true
+		case CC_WRITE_STRING:
+		case CC_WRITE_SMALL_DOTS_PIC:
+		default:
+			continue
+		}
+	}
+	if !found {
+		err = errors.New("unable to auto allocate memory - no labels found in command")
+	}
+	return
+}
+
+func TextMemoryCmd(label byte, size int) (p []byte) {
+	p = []byte{
+		label,
+		M_FT_TEXT,
+		M_KP_LOCKED,
+	}
+	p = append(p, fmt.Sprintf("%04X", size)...)
+	p = append(p, "FF00"...)
+	return
+}
+
+/*
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"regexp"
+	"strconv"
+	"text/template"
+	"time"
+)
+type ASign struct {
+	Rw                io.ReadWriter
+	Address           string
+	TypeCode          byte
+	DisableAutoMemory bool
+	StxDelay          time.Duration
+	PacketDelay       time.Duration
 }
 
 func (s *ASign) SOT() []byte {
@@ -179,6 +301,8 @@ func TextMemoryCmd(label byte, size int) (p []byte) {
 	return
 }
 
+
+*/
 func PacketString(pack []byte) string {
 	str := fmt.Sprintf("===== Packet (Size: %v) =====\n", len(pack))
 	str += fmt.Sprintln("DEC:", pack)

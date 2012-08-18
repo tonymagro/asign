@@ -1,53 +1,91 @@
 package asign
 
 import (
-	"fmt"
-	"strings"
-	"text/template"
+	"regexp"
 )
 
-var CmdLookup = map[string]string{}
+var (
+	cmdLookup     = map[string][]byte{}
+	cmdRegex      *regexp.Regexp
+	cmdLabelRegex *regexp.Regexp
+)
 
 func init() {
-	for k, v := range ModeCode {
-		CmdLookup[k] = fmt.Sprintf("%c%c%c", ESC, DP_MIDDLE_LINE, v)
+	cmdMaps := []map[string]byte{
+		Escape,
+		ValidLabel,
+		CommandCode,
 	}
-	for k, v := range SpecialMode {
-		CmdLookup[k] = fmt.Sprintf("%c%c%c%c", ESC, DP_MIDDLE_LINE, MC_SPECIAL, v)
-	}
-	for k, v := range DisplayPosition {
-		CmdLookup[k] = fmt.Sprintf("%c", v)
+
+	for _, cmdMap := range cmdMaps {
+		for k, v := range cmdMap {
+			cmdLookup[k] = []byte{v}
+		}
 	}
 	for k, v := range Color {
-		CmdLookup[k] = fmt.Sprintf("%c%c", COL, v)
+		cmdLookup[k] = []byte{COL, v}
 	}
-	for k, v := range ValidLabel {
-		CmdLookup[k] = fmt.Sprintf("%c", v)
+	for k, v := range ModeCode {
+		cmdLookup[k] = []byte{ESC, DP_MIDDLE_LINE, v}
 	}
-	for k, v := range Escape {
-		CmdLookup[k] = fmt.Sprintf("%c", v)
+
+	cmdLookup["SOT"] = []byte{
+		0x00, 0x00, 0x00, 0x00, 0x00, // auto baud
+		SOH,      // SOH
+		'Z',      // TC_ALLSIGNS
+		'0', '0', // SA_BROADCAST
 	}
+
+	cmdRegex = regexp.MustCompile(cmdRegexpString(cmdLookup))
 }
 
-var funcMap = template.FuncMap{
-	"DisplayPos": func(pos string, mode string) string {
-		return strings.Replace(mode, fmt.Sprintf("%c",DP_MIDDLE_LINE), pos, 1)
-	},
-	"SpecialPos": func(pos string, spec string) string {
-		return strings.Replace(spec, fmt.Sprintf("%c",DP_MIDDLE_LINE), pos, 1)
-	},
-	"Special": func() string {
-		return fmt.Sprintf("%c%c", STX, CC_WRITE_SPECIAL)
-	},	
-	"Text": func(label string) string {
-		return fmt.Sprintf("%c%c%s", STX, CC_WRITE_TEXT, label)
-	},	
-	"Dot": func(label string) string {
-		return fmt.Sprintf("%c%c%s", STX, CC_WRITE_SMALL_DOTS_PIC, label)
-	},	
-	"String": func(label string) string {
-		return fmt.Sprintf("%c%c%s", STX, CC_WRITE_STRING, label)
-	},	
+func cmdRegexpString(cmds map[string][]byte) string {
+	s := `\{(`
+	i := 0
+	for k := range cmds {
+		s += regexp.QuoteMeta(k)
+		if i != len(cmds)-1 {
+			s += "|"
+		}
+		i++
+	}
+	s += `)\}`
+	return s
+}
+
+func Parse(tmpl []byte) (p []byte, err error) {
+	p = cmdRegex.ReplaceAllFunc(tmpl, func(c []byte) (b []byte) {
+		println(string(c))
+		if hex, ok := cmdLookup[string(c[1:len(c)-1])]; ok {
+			b = hex
+		} else {
+			b = c
+		}
+		return
+	})
+	return
+}
+
+type protocolDef struct {
+	Escape          map[string]byte
+	TypeCode        map[string]byte
+	CommandCode     map[string]byte
+	DisplayPosition map[string]byte
+	ModeCode        map[string]byte
+	SpecialMode     map[string]byte
+	Color           map[string]byte
+	ValidLabel      map[string]byte
+}
+
+var Protocol = protocolDef{
+	Escape,
+	TypeCode,
+	CommandCode,
+	DisplayPosition,
+	ModeCode,
+	SpecialMode,
+	Color,
+	ValidLabel,
 }
 
 var Escape = map[string]byte{
@@ -85,7 +123,6 @@ var DisplayPosition = map[string]byte{
 	"MiddleLine": DP_MIDDLE_LINE,
 	"TopLine":    DP_TOP_LINE,
 }
-
 
 var ModeCode = map[string]byte{
 	"Rotate":    MC_ROTATE,

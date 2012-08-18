@@ -1,5 +1,6 @@
 package asign
 
+/*
 import (
 	"bytes"
 	"testing"
@@ -47,6 +48,7 @@ func TestWriteTextFile(t *testing.T) {
 		t.FailNow()
 	}
 }
+*/
 
 /*
 func TestWriteFile(t *testing.T) {

@@ -1,0 +1,65 @@
+{SOT Broadcast AllSignTypes}
+{{STX}}
+{TextAlloc A 1024}
+{TextAlloc B 1024}
+{TextAlloc Z 1024}
+{TextAlloc X 1024}
+{DotAlloc E 1024}
+{DotAlloc F 1024}
+{StringAlloc G 1024}
+{TextAlloc H 1024}
+{EOT}
+
+{SOT Broadcast AllSignTypes AutoAlloc}
+
+{STX}{TextFile A}{Rotate}Here is some {Red}red {Green}green and {Blue} text{RollUp}{Oragne}Some orange text!{ETX}
+
+{STX}
+{TextFile B}
+{RollDown}{Rainbow1}This text is rolling down
+{Rotate}{Brown}Here is some rotating {DimRed}text
+{ETX}
+
+{STX}
+{TextFile Z}
+{Rotate}{Red}Some Test Data For {Yellow}File Label A{Flash}{Orange}Some orange text for the sign{ETX}
+
+
+{STX}{TextFile X}{RollDown|TopLine}{Brown}Some Test Data For {Yellow}File Label B{RollUp}{Green}Some green text for the sign{ETX}
+
+{STX}
+{TextFile C}
+{RollUp}{Blue}Some Test Data For {Green}File Label C{Flash}{Yellow}Some yellow text for the sign
+{ETX}
+
+{STX}{TextFile D}{ThankYou}{ETX}
+
+{STX}
+{DotFile E}
+00000000000000000200000000000000000
+00000000000000002020000000000000000
+00000000000000020002000000000000000
+00000000000000200000200000000000000
+00000000000002000000020000000000000
+00000000000020000000002000000000000
+00000000000200000000000200000000000
+00000000002222222222222220000000000
+{ETX}
+
+{STX}
+{DotFile F}
+11111000002000000200000000000100000
+11111000002000002020000000000100000
+11111000002000020002000000000100000
+00000000002000200000200000000100000
+22222222222222222222222222222222222
+00000000002020000000002000000100000
+00000000002200000000000200000100000
+00000000002222222222222220000100000
+{ETX}
+
+[{StringFile G}10]
+
+
+{TextFile H}Dot E: {Dot E} Dot F: {Dot F} String G: {String G}{ETX}
+{EOT}
