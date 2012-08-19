@@ -66,27 +66,6 @@ func Parse(tmpl []byte) (p []byte, err error) {
 	return
 }
 
-type protocolDef struct {
-	Escape          map[string]byte
-	TypeCode        map[string]byte
-	CommandCode     map[string]byte
-	DisplayPosition map[string]byte
-	ModeCode        map[string]byte
-	SpecialMode     map[string]byte
-	Color           map[string]byte
-	ValidLabel      map[string]byte
-}
-
-var Protocol = protocolDef{
-	Escape,
-	TypeCode,
-	CommandCode,
-	DisplayPosition,
-	ModeCode,
-	SpecialMode,
-	Color,
-	ValidLabel,
-}
 
 var Escape = map[string]byte{
 	"NUL": NUL,
