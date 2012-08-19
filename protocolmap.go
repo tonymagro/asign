@@ -173,6 +173,38 @@ var Color = map[string]byte{
 	"AutoColor": 0x43,
 }
 
+var ExtendedCharacter = map[string]byte{
+	"Euro":          EC_EURO,
+	"YPunc":         EC_YPUNC,
+	"UpArrow":       EC_UPARROW,
+	"DownArrow":     EC_DOWNARROW,
+	"PackMan":       EC_PACKMAN,
+	"SailBoat":      EC_SAILBOAT,
+	"Ball":          EC_BALL,
+	"Telephone":     EC_TELEPHONE,
+	"Heart":         EC_HEART,
+	"Car":           EC_CAR,
+	"Handicap":      EC_HANDICAP,
+	"Rhino":         EC_RHINO,
+	"Mug":           EC_MUG,
+	"SatelliteDish": EC_SATELLITEDISH,
+	"Copyright":     EC_COPYRIGHT,
+	"Male":          EC_MALE,
+	"Female":        EC_FEMALE,
+	"Bottle":        EC_BOTTLE,
+	"Diskette":      EC_DISKETTE,
+	"Printer":       EC_PRINTER,
+	"MusicalNote":   EC_MUSICALNOTE,
+	"Infinity":      EC_INFINITY,
+	"Temp1":         EC_SC_TEMP1,
+	"Temp2":         EC_SC_TEMP2,
+	"Counter1":      EC_SC_COUNTER1,
+	"Counter2":      EC_SC_COUNTER2,
+	"Counter3":      EC_SC_COUNTER3,
+	"Counter4":      EC_SC_COUNTER4,
+	"Counter5":      EC_SC_COUNTER5,
+}
+
 var ValidLabel = map[string]byte{
 	" ":  0x20,
 	"!":  0x21,
