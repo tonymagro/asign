@@ -66,7 +66,6 @@ func Parse(tmpl []byte) (p []byte, err error) {
 	return
 }
 
-
 var Escape = map[string]byte{
 	"NUL": NUL,
 	"SOH": SOH,
@@ -104,15 +103,27 @@ var DisplayPosition = map[string]byte{
 }
 
 var ModeCode = map[string]byte{
-	"Rotate":    MC_ROTATE,
-	"Hold":      MC_HOLD,
-	"Flash":     MC_FLASH,
-	"RollUp":    MC_ROLL_UP,
-	"RollDown":  MC_ROLL_DOWN,
-	"RollLeft":  MC_ROLL_LEFT,
-	"RollRight": MC_ROLL_RIGHT,
-	"AutoMode":  MC_AUTO_MODE,
-	"Special":   MC_SPECIAL,
+	"Rotate":           MC_ROTATE,
+	"Hold":             MC_HOLD,
+	"Flash":            MC_FLASH,
+	"RollUp":           MC_ROLL_UP,
+	"RollDown":         MC_ROLL_DOWN,
+	"RollLeft":         MC_ROLL_LEFT,
+	"RollRight":        MC_ROLL_RIGHT,
+	"WipeUp":           MC_WIPE_UP,
+	"WipeDown":         MC_WIPE_DOWN,
+	"WipeLeft":         MC_WIPE_LEFT,
+	"WipeRight":        MC_WIPE_RIGHT,
+	"Scroll":           MC_SCROLL,
+	"AutoMode":         MC_AUTO_MODE,
+	"RollIn":           MC_ROLL_IN,
+	"RollOut":          MC_ROLL_OUT,
+	"WipeIn":           MC_WIPE_IN,
+	"WipeOut":          MC_WIPE_OUT,
+	"CompressedRotate": MC_COMPRESSED_ROTATE,
+	"Explode":          MC_EXPLODE,
+	"Clock":            MC_CLOCK,
+	"Special":          MC_SPECIAL,
 }
 
 var SpecialMode = map[string]byte{

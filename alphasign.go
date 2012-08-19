@@ -61,6 +61,7 @@ func (s *ASign) Write(p []byte) (n int, err error) {
 var stxToEtx = regexp.MustCompile(fmt.Sprintf("%c[^%c]*%c", STX, ETX, ETX))
 func (s *ASign) WriteTemplate(text []byte) (n int, err error) {
 	cmd, err := Parse(text)
+	cmd = bytes.Replace(cmd, []byte{'\n'}, []byte{}, -1)
 	if err != nil {
 		return
 	}
@@ -71,7 +72,6 @@ func (s *ASign) WriteTemplate(text []byte) (n int, err error) {
 		}
 		time.Sleep(time.Millisecond * s.PacketDelay)
 	}
-	cmd = bytes.Replace(cmd, []byte{'\n'}, []byte{}, -1)
 	return s.Write(cmd)
 }
 
