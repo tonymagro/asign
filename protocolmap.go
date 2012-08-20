@@ -25,6 +25,9 @@ func init() {
 	for k, v := range Color {
 		cmdLookup[k] = []byte{COL, v}
 	}
+	for k, v := range ExtendedCharacter {
+		cmdLookup[k] = []byte{0x08, v}
+	}
 	for k, v := range ModeCode {
 		cmdLookup[k] = []byte{ESC, DP_MIDDLE_LINE, v}
 	}
@@ -55,7 +58,6 @@ func cmdRegexpString(cmds map[string][]byte) string {
 
 func Parse(tmpl []byte) (p []byte, err error) {
 	p = cmdRegex.ReplaceAllFunc(tmpl, func(c []byte) (b []byte) {
-		println(string(c))
 		if hex, ok := cmdLookup[string(c[1:len(c)-1])]; ok {
 			b = hex
 		} else {
