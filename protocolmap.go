@@ -31,6 +31,12 @@ func init() {
 	for k, v := range ModeCode {
 		cmdLookup[k] = []byte{ESC, DP_MIDDLE_LINE, v}
 	}
+	for k, v := range SpecialMode {
+		cmdLookup[k] = []byte{ESC, DP_MIDDLE_LINE, MC_SPECIAL, v}
+	}
+	for k, v := range SpecialGraphics {
+		cmdLookup[k] = []byte{ESC, DP_MIDDLE_LINE, MC_SPECIAL, v}
+	}
 
 	cmdLookup["SOT"] = []byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, // auto baud
@@ -129,19 +135,22 @@ var ModeCode = map[string]byte{
 }
 
 var SpecialMode = map[string]byte{
-	"Twinkle":           MC_S_TWINKLE,
-	"Sparkle":           MC_S_SPARKLE,
-	"Snow":              MC_S_SNOW,
-	"Interlock":         MC_S_INTERLOCK,
-	"Switch":            MC_S_SWITCH,
-	"SlideColor":        MC_S_SLIDECOLOR,
-	"Spray":             MC_S_SPRAY,
-	"Starburst":         MC_S_STARBURST,
-	"Welcome":           MC_S_WELCOME,
-	"SlotMachine":       MC_S_SLOTMACHINE,
-	"NewsFlash":         MC_S_NEWSFLASH,
-	"TrumpetAnimation":  MC_S_TRUMPETANIMATION,
-	"CycleColors":       MC_S_CYCLECOLORS,
+	"Twinkle":          MC_S_TWINKLE,
+	"Sparkle":          MC_S_SPARKLE,
+	"Snow":             MC_S_SNOW,
+	"Interlock":        MC_S_INTERLOCK,
+	"Switch":           MC_S_SWITCH,
+	"SlideColor":       MC_S_SLIDECOLOR,
+	"Spray":            MC_S_SPRAY,
+	"Starburst":        MC_S_STARBURST,
+	"Welcome":          MC_S_WELCOME,
+	"SlotMachine":      MC_S_SLOTMACHINE,
+	"NewsFlash":        MC_S_NEWSFLASH,
+	"TrumpetAnimation": MC_S_TRUMPETANIMATION,
+	"CycleColors":      MC_S_CYCLECOLORS,
+}
+
+var SpecialGraphics = map[string]byte{
 	"NoSmoking":         MC_SG_NOSMOKING,
 	"DontDrinkAndDrive": MC_SG_DONTDRINKANDDRIVE,
 	"RunningAnimal":     MC_SG_RUNNINGANIMAL,
